@@ -14,6 +14,7 @@ Import the template: `template_cctv_hikvision_doorbell.yaml`
 ## Example Images
 
 ### Items:
-
+![Items](IMG/Items.png)
 
 ### Latest Data:
+![Latest Data](IMG/LatestData.png)
