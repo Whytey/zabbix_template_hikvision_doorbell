@@ -1,0 +1,129 @@
+zabbix_export:
+  version: '5.4'
+  date: '2021-07-04T12:00:23Z'
+  groups:
+    -
+      uuid: d37f71c7e3f7469bab645852a69a2018
+      name: 'Templates/Video surveillance'
+  templates:
+    -
+      uuid: 0ffe58ae6c734abe84efa6e37847caff
+      template: 'Hikvision doorbell by HTTP'
+      name: 'Hikvision doorbell by HTTP'
+      groups:
+        -
+          name: 'Templates/Video surveillance'
+      items:
+        -
+          uuid: d4023b4006d84f09979bb2780d432244
+          name: 'Hikvision doorbell: SIP is enabled'
+          type: DEPENDENT
+          key: hikvision_cam.sip_enabled
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.SIPServerList.SIPServer.Standard.enabled
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 24h
+          master_item:
+            key: hikvision_doorbell.sip_status
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: e9323da3ee324ed1b805fab214b19bb4
+          name: 'Hikvision doorbell: SIP Server'
+          type: DEPENDENT
+          key: hikvision_cam.sip_server
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.SIPServerList.SIPServer.Standard.proxy
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 24h
+          master_item:
+            key: hikvision_doorbell.sip_status
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: c2779644c49a45388e27b2c3b5ad58b3
+          name: 'Hikvision doorbell: SIP Server Port'
+          type: DEPENDENT
+          key: hikvision_cam.sip_server_port
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.SIPServerList.SIPServer.Standard.proxyPort
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 24h
+          master_item:
+            key: hikvision_doorbell.sip_status
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: d2b532f817f446b48617aca149019166
+          name: 'Hikvision doorbell: Get SIP status'
+          type: HTTP_AGENT
+          key: hikvision_doorbell.sip_status
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          authtype: DIGEST
+          username: '{$USER}'
+          password: '{$PASSWORD}'
+          description: 'It is used to get the status information of the device'
+          preprocessing:
+            -
+              type: CHECK_NOT_SUPPORTED
+              parameters:
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '{"html":{"head":{"title":"Connection error"}}}'
+            -
+              type: XML_TO_JSON
+              parameters:
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '{"html":{"head":{"title":"Connection error"}}}'
+          url: 'http://{HOST.CONN}:{$HIKVISION_ISAPI_PORT}/ISAPI/System/Network/SIP'
+          status_codes: '200,401'
+          tags:
+            -
+              tag: Application
+              value: 'Zabbix raw items'
+      macros:
+        -
+          macro: '{$HIKVISION_ISAPI_PORT}'
+          value: '80'
+          description: 'ISAPI port on device'
+        -
+          macro: '{$PASSWORD}'
+        -
+          macro: '{$USER}'
+          value: admin
